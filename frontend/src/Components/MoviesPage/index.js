@@ -26,8 +26,6 @@ class MoviesPage extends Component {
 
       const data = await response.json();
 
-      console.log(data);
-
       this.setState({
         moviesList: data, // store movies
         isLoading: false,
