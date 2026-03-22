@@ -3,8 +3,8 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const Database = require("better-sqlite3");
 const { open } = require("sqlite");
-const sqlite3 = require("sqlite3");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
@@ -25,13 +25,12 @@ const ADMIN_CREDENTIALS = {
 // --- Initialize DB and Server ---
 const initializeDBAndServer = async () => {
   try {
-    db = await open({
-      filename: dbPath,
-      driver: sqlite3.Database,
-    });
+    db = new Database(dbPath);
 
     // --- Create tables if not exist ---
-    await db.run(`CREATE TABLE IF NOT EXISTS movies (
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS movies (
       id TEXT PRIMARY KEY,
       title TEXT,
       year INTEGER,
@@ -44,26 +43,38 @@ const initializeDBAndServer = async () => {
       runTime INTEGER,
       releaseDate TEXT,
       rating TEXT
-    )`);
+    )`,
+      )
+      .run();
 
-    await db.run(`CREATE TABLE IF NOT EXISTS comics (
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS comics (
       id TEXT PRIMARY KEY,
       title TEXT,
       issue_number INTEGER,
       year INTEGER,
       author TEXT,
       description TEXT
-    )`);
+    )`,
+      )
+      .run();
 
-    await db.run(`CREATE TABLE IF NOT EXISTS characters (
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS characters (
       id TEXT PRIMARY KEY,
       name TEXT,
       alias TEXT,
       first_appearance TEXT,
       description TEXT
-    )`);
+    )`,
+      )
+      .run();
 
-    await db.run(`CREATE TABLE IF NOT EXISTS tv_shows (
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS tv_shows (
       id TEXT PRIMARY KEY,
       title TEXT,
       seasons INTEGER,
@@ -71,9 +82,13 @@ const initializeDBAndServer = async () => {
       year INTEGER,
       genre TEXT,
       description TEXT
-    )`);
+    )`,
+      )
+      .run();
 
-    await db.run(`CREATE TABLE IF NOT EXISTS videos (
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS videos (
       id TEXT PRIMARY KEY,
       title TEXT,
       type TEXT,
@@ -81,23 +96,33 @@ const initializeDBAndServer = async () => {
       description TEXT,
       movie_id TEXT,
       tv_show_id TEXT
-    )`);
+    )`,
+      )
+      .run();
 
-    await db.run(`CREATE TABLE IF NOT EXISTS movie_characters (
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS movie_characters (
       movie_id TEXT,
       character_id TEXT,
       PRIMARY KEY (movie_id, character_id),
       FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
       FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
-    )`);
+    )`,
+      )
+      .run();
 
-    await db.run(`CREATE TABLE IF NOT EXISTS comic_characters (
+    await db
+      .prepare(
+        `CREATE TABLE IF NOT EXISTS comic_characters (
       comic_id TEXT,
       character_id TEXT,
       PRIMARY KEY (comic_id, character_id),
       FOREIGN KEY (comic_id) REFERENCES comics(id) ON DELETE CASCADE,
       FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
-    )`);
+    )`,
+      )
+      .run();
 
     // --- Start server ---
     app.listen(5000, () => {
@@ -163,9 +188,9 @@ app.post("/admin/login", (req, res) => {
 // --- Movies Routes (CRUD) ---
 
 // --- 1. Delete All Movies Route ---
-app.delete("/movies/all", async (req, res) => {
+app.delete("/movies/all", authenticateAdmin, async (req, res) => {
   try {
-    await db.run("DELETE FROM movies");
+    await db.prepare("DELETE FROM movies").run();
     res.json({ message: "All movies deleted successfully!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -175,7 +200,7 @@ app.delete("/movies/all", async (req, res) => {
 // Get all movies sorted by release date (ascending)
 app.get("/movies", async (req, res) => {
   try {
-    const movies = await db.all("SELECT * FROM movies");
+    const movies = await db.prepare("SELECT * FROM movies").all();
 
     // Convert releaseDate strings to Date objects and sort
     const sortedMovies = movies.sort((a, b) => {
@@ -193,9 +218,9 @@ app.get("/movies", async (req, res) => {
 // Get a single movie by ID
 app.get("/movies/:id", async (req, res) => {
   try {
-    const movie = await db.get("SELECT * FROM movies WHERE id = ?", [
-      req.params.id,
-    ]);
+    const movie = await db
+      .prepare("SELECT * FROM movies WHERE id = ?")
+      .get(req.params.id);
     if (!movie) return res.status(404).json({ message: "Movie not found" });
     res.json(movie);
   } catch (err) {
@@ -204,7 +229,7 @@ app.get("/movies/:id", async (req, res) => {
 });
 
 // Add a new movie
-app.post("/movies", async (req, res) => {
+app.post("/movies", authenticateAdmin, (req, res) => {
   try {
     const {
       title,
@@ -216,37 +241,37 @@ app.post("/movies", async (req, res) => {
       director,
       writer,
       runTime,
-      releaseDate, // expects "YYYY-MM-DD"
+      releaseDate,
       rating,
     } = req.body;
 
     const id = uuidv4();
 
-    // Optionally convert date to "Month Day, Year" for display
     const displayDate = new Date(releaseDate).toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
     });
 
-    await db.run(
-      `INSERT INTO movies 
-       (id, title, year, posterImageUrl, bannerImageUrl, overview, trailerUrl, director, writer, runTime, releaseDate, rating)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        id,
-        title,
-        year,
-        posterImageUrl,
-        bannerImageUrl,
-        overview,
-        trailerUrl,
-        director,
-        writer,
-        runTime,
-        displayDate, // store in readable format
-        rating,
-      ],
+    db.prepare(
+      `
+      INSERT INTO movies 
+      (id, title, year, posterImageUrl, bannerImageUrl, overview, trailerUrl, director, writer, runTime, releaseDate, rating)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    ).run(
+      id,
+      title,
+      year,
+      posterImageUrl,
+      bannerImageUrl,
+      overview,
+      trailerUrl,
+      director,
+      writer,
+      runTime,
+      displayDate,
+      rating,
     );
 
     res.status(201).json({ id, ...req.body, releaseDate: displayDate });
@@ -254,8 +279,9 @@ app.post("/movies", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 // Update a movie
-app.put("/movies/:id", async (req, res) => {
+app.put("/movies/:id", authenticateAdmin, (req, res) => {
   try {
     const {
       title,
@@ -267,7 +293,7 @@ app.put("/movies/:id", async (req, res) => {
       director,
       writer,
       runTime,
-      releaseDate, // expects "YYYY-MM-DD"
+      releaseDate,
       rating,
     } = req.body;
 
@@ -277,11 +303,15 @@ app.put("/movies/:id", async (req, res) => {
       year: "numeric",
     });
 
-    const result = await db.run(
-      `UPDATE movies
-       SET title=?, year=?, posterImageUrl=?, bannerImageUrl=?, overview=?, trailerUrl=?, director=?, writer=?, runTime=?, releaseDate=?, rating=?
-       WHERE id=?`,
-      [
+    const result = db
+      .prepare(
+        `
+      UPDATE movies
+      SET title=?, year=?, posterImageUrl=?, bannerImageUrl=?, overview=?, trailerUrl=?, director=?, writer=?, runTime=?, releaseDate=?, rating=?
+      WHERE id=?
+    `,
+      )
+      .run(
         title,
         year,
         posterImageUrl,
@@ -294,8 +324,7 @@ app.put("/movies/:id", async (req, res) => {
         displayDate,
         rating,
         req.params.id,
-      ],
-    );
+      );
 
     if (result.changes === 0)
       return res.status(404).json({ message: "Movie not found" });
@@ -307,11 +336,12 @@ app.put("/movies/:id", async (req, res) => {
 });
 
 // Delete a movie
-app.delete("/movies/:id", async (req, res) => {
+app.delete("/movies/:id", authenticateAdmin, (req, res) => {
   try {
-    const result = await db.run("DELETE FROM movies WHERE id = ?", [
-      req.params.id,
-    ]);
+    const result = db
+      .prepare("DELETE FROM movies WHERE id = ?")
+      .run(req.params.id);
+
     if (result.changes === 0)
       return res.status(404).json({ message: "Movie not found" });
 
