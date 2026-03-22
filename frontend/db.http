@@ -10,8 +10,7 @@ Content-Type: application/json
 ###
 
 ### ⚠️ Copy token from above response and paste below
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc0MTkyOTYyLCJleHAiOjE3NzQyMDAxNjJ9.r5dkwKGo6Qs8V104jjan-43v62LlSW0Bvhx16L2UAUA
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc0MTk0OTMyLCJleHAiOjE3NzQyMDIxMzJ9.sEdHPJd99h-EjfUjkawCwGkEHitsWhJiXlhygomN1yQ
 ###
 
 ### 2. Add Movie
@@ -21,7 +20,7 @@ Content-Type: application/json
 
 {
   "title": "Ustaad Bhagat Singh",
-  "year": 2026,
+  "year": 1990,
   "posterImageUrl": "https://example.com/poster.jpg",
   "bannerImageUrl": "https://example.com/banner.jpg",
   "overview": "Avengers fight Thanos.",
@@ -29,7 +28,7 @@ Content-Type: application/json
   "director": "Anthony Russo, Joe Russo",
   "writer": "Christopher Markus, Stephen McFeely",
   "runTime": 149,
-  "releaseDate": "2026-03-19",
+  "releaseDate": "1990-03-19",
   "rating": "PG-13"
 }
 
@@ -67,7 +66,7 @@ Content-Type: application/json
 ###
 
 ### 6. Delete Single Movie
-DELETE http://localhost:5000/movies/00156e58-3dc8-407e-9526-5ff69230ad7f
+DELETE http://localhost:5000/movies/b02e57a1-1f0e-46a3-bad6-23a97c834691
 Authorization: Bearer {{token}}
 
 ###

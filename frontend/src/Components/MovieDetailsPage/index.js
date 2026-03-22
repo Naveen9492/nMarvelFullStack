@@ -1,4 +1,3 @@
-import { getMovieById } from "../Resources";
 import { ThreeDots } from "react-loader-spinner";
 import { Link } from "react-router-dom";
 import { Component } from "react";
@@ -7,20 +6,36 @@ import Footer from "../Footer";
 import "./index.css";
 
 class MovieDetailsPage extends Component {
-  state = { movieDetails: {}, isLoading: true };
+  state = { movieDetails: {}, isLoading: false };
 
   componentDidMount() {
-    this.getMovies();
+    this.getMovieDetails();
   }
 
-  getMovies = () => {
+  getMovieDetails = async () => {
+    this.setState({ isLoading: true });
     const { match } = this.props;
     const { params } = match;
     const { id } = params;
-    const movie = getMovieById(parseInt(id));
-    setTimeout(() => {
-      this.setState({ movieDetails: movie, isLoading: false });
-    }, 400);
+    try {
+      const movieDetailsURL = `https://nmarvelfullstack.onrender.com/movies/${id}`;
+      const response = await fetch(movieDetailsURL);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
+      }
+
+      const data = await response.json();
+
+      this.setState({
+        movieDetails: data,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+
+      this.setState({ isLoading: false });
+    }
   };
 
   render() {

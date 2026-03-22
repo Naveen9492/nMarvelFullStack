@@ -64,6 +64,13 @@ const NavBar = () => {
         >
           <p className="navbar-menu-item">VIDEOS</p>
         </Link>
+        <Link
+          to="/admin/login"
+          onClick={() => setOpen(false)}
+          className="nav-item-link"
+        >
+          <p className="navbar-menu-item">ADMIN</p>
+        </Link>
       </div>
     </nav>
   );
