@@ -48,7 +48,9 @@
   color: #e30e1c;
   border-radius: 8px;
 }
-
+.hamburger {
+  display: none;
+}
 @media screen and (min-width: 768px) and (max-width: 991px) {
   .navbar-menu-item {
     font-size: 12px;
@@ -61,9 +63,7 @@
     width: 140px;
     height: 50px;
   }
-  .hamburger {
-    display: none;
-  }
+
   .navbar-menu-item-container {
     padding: 0px 10px;
   }
