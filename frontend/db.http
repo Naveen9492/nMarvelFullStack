@@ -1,23 +1,77 @@
-
-
-### Add a new movie
-POST http://localhost:5000/movies
+### 1. Admin Login (Get Token)
+POST http://localhost:5000/admin/login
 Content-Type: application/json
 
 {
-  "title": "The Call Him OG",
-  "year": "2016",
-  "posterImageUrl": "https://cdn.marvel.com/content/2x/doctorstrange_lob_crd_02.jpg",
-  "bannerImageUrl": "https://cdn.marvel.com/content/1x/doctorstrange_lob_fea_dsk_01.jpg",
-  "overview": "Doctor Stephen Strange, a brilliant but arrogant surgeon, loses the use of his hands in a car accident and discovers the hidden world of magic and alternate dimensions.",
-  "trailerUrl": "https://www.youtube.com/embed/HSzx-zryEgM",
-  "director": "Scott Derrickson",
-  "writer": "Jon Spaihts, Scott Derrickson, C. Robert Cargill",
-  "runTime": 115,
-  "releaseDate": "2016-11-05",
+  "username": "admin",
+  "password": "admin123"
+}
+
+###
+
+### ⚠️ Copy token from above response and paste below
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc0MTkyOTYyLCJleHAiOjE3NzQyMDAxNjJ9.r5dkwKGo6Qs8V104jjan-43v62LlSW0Bvhx16L2UAUA
+
+###
+
+### 2. Add Movie
+POST http://localhost:5000/movies
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Ustaad Bhagat Singh",
+  "year": 2026,
+  "posterImageUrl": "https://example.com/poster.jpg",
+  "bannerImageUrl": "https://example.com/banner.jpg",
+  "overview": "Avengers fight Thanos.",
+  "trailerUrl": "https://youtube.com/embed/6ZfuNTqbHE8",
+  "director": "Anthony Russo, Joe Russo",
+  "writer": "Christopher Markus, Stephen McFeely",
+  "runTime": 149,
+  "releaseDate": "2026-03-19",
   "rating": "PG-13"
 }
 
 ###
 
-DELETE http://localhost:5000/movies/f3c162e1-10d1-45d5-8a5c-852af384f6c0
+### 3. Get All Movies (Sorted by Date)
+GET http://localhost:5000/movies
+
+###
+
+### 4. Get Single Movie (replace ID)
+GET http://localhost:5000/movies/00156e58-3dc8-407e-9526-5ff69230ad7f
+
+###
+
+### 5. Update Movie
+PUT http://localhost:5000/movies/00156e58-3dc8-407e-9526-5ff69230ad7f
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "They Call Him OG 2",
+  "year": 2028,
+  "posterImageUrl": "https://example.com/poster2.jpg",
+  "bannerImageUrl": "https://example.com/banner2.jpg",
+  "overview": "Updated overview.",
+  "trailerUrl": "https://youtube.com/embed/6ZfuNTqbHE8",
+  "director": "Russo Brothers",
+  "writer": "Marvel Studios",
+  "runTime": 150,
+  "releaseDate": "2028-04-27",
+  "rating": "PG-13"
+}
+
+###
+
+### 6. Delete Single Movie
+DELETE http://localhost:5000/movies/00156e58-3dc8-407e-9526-5ff69230ad7f
+Authorization: Bearer {{token}}
+
+###
+
+### 7. Delete All Movies
+DELETE http://localhost:5000/movies/all
+Authorization: Bearer {{token}}

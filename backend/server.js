@@ -6,8 +6,10 @@ const path = require("path");
 const Database = require("better-sqlite3");
 const { open } = require("sqlite");
 const { v4: uuidv4 } = require("uuid");
+const cors = require("cors");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const dbPath = path.join(__dirname, "app.db");
