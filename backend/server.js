@@ -276,9 +276,17 @@ app.post("/movies", authenticateAdmin, (req, res) => {
       rating,
     );
 
-    res.status(201).json({ id, ...req.body, releaseDate: displayDate });
+    res.status(201).json({
+      id,
+      ...req.body,
+      releaseDate: displayDate,
+      message: "Successfully added a movie",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log(err.message);
+    res
+      .status(500)
+      .json({ message: "Something wnet wrong! Check console for details" });
   }
 });
 

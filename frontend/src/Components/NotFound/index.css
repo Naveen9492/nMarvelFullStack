@@ -1,0 +1,21 @@
+.not-found-container {
+  height: 85vh;
+  width: 100%;
+  background-color: #000000;
+  font-family: "Trebuchet MS";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15vh;
+}
+.not-found-text {
+  color: #ffffff;
+  font-size: 20px;
+  text-align: center;
+}
+@media screen and (max-width: 576px) {
+  .not-found-container {
+    height: 90vh;
+    margin-top: 10vh;
+  }
+}

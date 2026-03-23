@@ -10,11 +10,10 @@ Content-Type: application/json
 ###
 
 ### ⚠️ Copy token from above response and paste below
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc0MTk0OTMyLCJleHAiOjE3NzQyMDIxMzJ9.sEdHPJd99h-EjfUjkawCwGkEHitsWhJiXlhygomN1yQ
-###
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc0Mjc1ODE4LCJleHAiOjE3NzQyODMwMTh9.lsbEc4sA3L1METbDZwoXYCV2c_iG-2jvulWuzb_r7VQ
 
 ### 2. Add Movie
-POST http://localhost:5000/movies
+POST https://nmarvelfullstack.onrender.com/movies/
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -66,7 +65,7 @@ Content-Type: application/json
 ###
 
 ### 6. Delete Single Movie
-DELETE http://localhost:5000/movies/b02e57a1-1f0e-46a3-bad6-23a97c834691
+DELETE https://nmarvelfullstack.onrender.com/movies/0543055f-5374-4b88-a9be-9ee9ec18537b
 Authorization: Bearer {{token}}
 
 ###
