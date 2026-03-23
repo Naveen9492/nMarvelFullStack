@@ -339,9 +339,17 @@ app.put("/movies/:id", authenticateAdmin, (req, res) => {
     if (result.changes === 0)
       return res.status(404).json({ message: "Movie not found" });
 
-    res.json({ id: req.params.id, ...req.body, releaseDate: displayDate });
+    res.json({
+      id: req.params.id,
+      ...req.body,
+      releaseDate: displayDate,
+      message: "Successfully Edited Movie",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log(err.message);
+    res
+      .status(500)
+      .json({ message: "Something wnet wrong! Check console for details" });
   }
 });
 
