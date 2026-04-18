@@ -19,12 +19,10 @@ const ADMIN_CREDENTIALS = {
 
 // PostgreSQL connection
 const pool = new Pool({
-  host: "db.ngqerdhahsnujuctrrzu.supabase.co",
-  port: 5432,
-  database: "postgres",
-  user: "postgres",
-  password: process.env.DB_PASSWORD, // move password to env
-  ssl: { rejectUnauthorized: false },
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 // ===================== INIT DB =====================
