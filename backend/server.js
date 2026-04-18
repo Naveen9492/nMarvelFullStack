@@ -1,151 +1,73 @@
-// backend/server.js
-
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const path = require("path");
-const Database = require("better-sqlite3");
-const { open } = require("sqlite");
 const { v4: uuidv4 } = require("uuid");
 const cors = require("cors");
+const { Pool } = require("pg");
+require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const dbPath = path.join(__dirname, "app.db");
-let db = null;
+// ===================== CONFIG =====================
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretjwtkey";
 
-// Hardcoded secret (no .env)
-const JWT_SECRET = "supersecretjwtkey"; // ⚠️ don't expose in production
-
-// Example admin credentials (can later move to DB)
 const ADMIN_CREDENTIALS = {
   username: "admin",
   password: "admin123",
 };
 
-// --- Initialize DB and Server ---
+// PostgreSQL connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+// ===================== INIT DB =====================
 const initializeDBAndServer = async () => {
   try {
-    db = new Database(dbPath);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS movies (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        year INTEGER,
+        posterImageUrl TEXT,
+        bannerImageUrl TEXT,
+        overview TEXT,
+        trailerUrl TEXT,
+        director TEXT,
+        writer TEXT,
+        runTime INTEGER,
+        releaseDate TEXT,
+        rating TEXT
+      );
+    `);
 
-    // --- Create tables if not exist ---
-    await db
-      .prepare(
-        `CREATE TABLE IF NOT EXISTS movies (
-      id TEXT PRIMARY KEY,
-      title TEXT,
-      year INTEGER,
-      posterImageUrl TEXT,
-      bannerImageUrl TEXT,
-      overview TEXT,
-      trailerUrl TEXT,
-      director TEXT,
-      writer TEXT,
-      runTime INTEGER,
-      releaseDate TEXT,
-      rating TEXT
-    )`,
-      )
-      .run();
+    console.log("Database connected & tables ready");
+    const PORT = process.env.PORT || 5000;
 
-    await db
-      .prepare(
-        `CREATE TABLE IF NOT EXISTS comics (
-      id TEXT PRIMARY KEY,
-      title TEXT,
-      issue_number INTEGER,
-      year INTEGER,
-      author TEXT,
-      description TEXT
-    )`,
-      )
-      .run();
-
-    await db
-      .prepare(
-        `CREATE TABLE IF NOT EXISTS characters (
-      id TEXT PRIMARY KEY,
-      name TEXT,
-      alias TEXT,
-      first_appearance TEXT,
-      description TEXT
-    )`,
-      )
-      .run();
-
-    await db
-      .prepare(
-        `CREATE TABLE IF NOT EXISTS tv_shows (
-      id TEXT PRIMARY KEY,
-      title TEXT,
-      seasons INTEGER,
-      episodes INTEGER,
-      year INTEGER,
-      genre TEXT,
-      description TEXT
-    )`,
-      )
-      .run();
-
-    await db
-      .prepare(
-        `CREATE TABLE IF NOT EXISTS videos (
-      id TEXT PRIMARY KEY,
-      title TEXT,
-      type TEXT,
-      url TEXT,
-      description TEXT,
-      movie_id TEXT,
-      tv_show_id TEXT
-    )`,
-      )
-      .run();
-
-    await db
-      .prepare(
-        `CREATE TABLE IF NOT EXISTS movie_characters (
-      movie_id TEXT,
-      character_id TEXT,
-      PRIMARY KEY (movie_id, character_id),
-      FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
-      FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
-    )`,
-      )
-      .run();
-
-    await db
-      .prepare(
-        `CREATE TABLE IF NOT EXISTS comic_characters (
-      comic_id TEXT,
-      character_id TEXT,
-      PRIMARY KEY (comic_id, character_id),
-      FOREIGN KEY (comic_id) REFERENCES comics(id) ON DELETE CASCADE,
-      FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
-    )`,
-      )
-      .run();
-
-    // --- Start server ---
-    app.listen(5000, () => {
-      console.log("Server Running at http://localhost:5000/");
+    app.listen(PORT, () => {
+      console.log(`Server Running on port ${PORT}`);
     });
-  } catch (e) {
-    console.log(`DB Error: ${e.message}`);
+  } catch (err) {
+    console.log("DB Error:", err.message);
     process.exit(1);
   }
 };
 
 initializeDBAndServer();
 
-//middleware
-
+// ===================== AUTH MIDDLEWARE =====================
 const authenticateAdmin = (req, res, next) => {
-  const authHeader = req.headers["authorization"]; // "Bearer <token>"
-  if (!authHeader) return res.status(401).json({ message: "Missing token" });
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "Missing token" });
+  }
 
   const token = authHeader.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "Missing token" });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -154,84 +76,69 @@ const authenticateAdmin = (req, res, next) => {
       return res.status(403).json({ message: "Admin access required" });
     }
 
-    req.user = decoded; // attach decoded info
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid token" });
   }
 };
 
-// Admin login route
+// ===================== LOGIN =====================
 app.post("/admin/login", (req, res) => {
-  const { username, password } = req.body; // username & password from UI
+  const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ message: "Username and password required" });
   }
 
-  // Validate credentials
   if (
     username === ADMIN_CREDENTIALS.username &&
     password === ADMIN_CREDENTIALS.password
   ) {
-    // Generate JWT token
-    const token = jwt.sign(
-      { username, role: "admin" }, // payload
-      JWT_SECRET, // secret
-      { expiresIn: "2h" }, // token valid for 2 hours
-    );
-
-    return res.json({ token });
-  } else {
-    return res.status(401).json({ message: "Invalid username or password" });
-  }
-});
-
-// --- Movies Routes (CRUD) ---
-
-// --- 1. Delete All Movies Route ---
-app.delete("/movies/all", authenticateAdmin, async (req, res) => {
-  try {
-    await db.prepare("DELETE FROM movies").run();
-    res.json({ message: "All movies deleted successfully!" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get all movies sorted by release date (ascending)
-app.get("/movies", async (req, res) => {
-  try {
-    const movies = await db.prepare("SELECT * FROM movies").all();
-
-    // Convert releaseDate strings to Date objects and sort
-    const sortedMovies = movies.sort((a, b) => {
-      const dateA = new Date(a.releaseDate); // e.g., "November 4, 2016"
-      const dateB = new Date(b.releaseDate);
-      return dateA - dateB; // ascending order
+    const token = jwt.sign({ username, role: "admin" }, JWT_SECRET, {
+      expiresIn: "2h",
     });
 
-    res.json(sortedMovies);
+    return res.json({ token });
+  }
+
+  res.status(401).json({ message: "Invalid username or password" });
+});
+
+// ===================== MOVIES =====================
+
+// GET ALL MOVIES
+app.get("/movies", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM movies ORDER BY releaseDate ASC",
+    );
+
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get a single movie by ID
+// GET MOVIE BY ID
 app.get("/movies/:id", async (req, res) => {
   try {
-    const movie = await db
-      .prepare("SELECT * FROM movies WHERE id = ?")
-      .get(req.params.id);
-    if (!movie) return res.status(404).json({ message: "Movie not found" });
-    res.json(movie);
+    const result = await pool.query("SELECT * FROM movies WHERE id = $1", [
+      req.params.id,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Add a new movie
-app.post("/movies", authenticateAdmin, (req, res) => {
+// ADD MOVIE
+app.post("/movies", authenticateAdmin, async (req, res) => {
   try {
     const {
       title,
@@ -249,49 +156,44 @@ app.post("/movies", authenticateAdmin, (req, res) => {
 
     const id = uuidv4();
 
-    const displayDate = new Date(releaseDate).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+    const formattedDate = releaseDate
+      ? new Date(releaseDate).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      : null;
 
-    db.prepare(
-      `
-      INSERT INTO movies 
+    const result = await pool.query(
+      `INSERT INTO movies 
       (id, title, year, posterImageUrl, bannerImageUrl, overview, trailerUrl, director, writer, runTime, releaseDate, rating)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `,
-    ).run(
-      id,
-      title,
-      year,
-      posterImageUrl,
-      bannerImageUrl,
-      overview,
-      trailerUrl,
-      director,
-      writer,
-      runTime,
-      displayDate,
-      rating,
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      RETURNING *`,
+      [
+        id,
+        title,
+        year,
+        posterImageUrl,
+        bannerImageUrl,
+        overview,
+        trailerUrl,
+        director,
+        writer,
+        runTime,
+        formattedDate,
+        rating,
+      ],
     );
 
-    res.status(201).json({
-      id,
-      ...req.body,
-      releaseDate: displayDate,
-      message: "Successfully added a movie",
-    });
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     console.log(err.message);
-    res
-      .status(500)
-      .json({ message: "Something wnet wrong! Check console for details" });
+    res.status(500).json({ error: "Failed to add movie" });
   }
 });
 
-// Update a movie
-app.put("/movies/:id", authenticateAdmin, (req, res) => {
+// UPDATE MOVIE
+app.put("/movies/:id", authenticateAdmin, async (req, res) => {
   try {
     const {
       title,
@@ -307,21 +209,30 @@ app.put("/movies/:id", authenticateAdmin, (req, res) => {
       rating,
     } = req.body;
 
-    const displayDate = new Date(releaseDate).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
+    const formattedDate = releaseDate
+      ? new Date(releaseDate).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      : null;
 
-    const result = db
-      .prepare(
-        `
-      UPDATE movies
-      SET title=?, year=?, posterImageUrl=?, bannerImageUrl=?, overview=?, trailerUrl=?, director=?, writer=?, runTime=?, releaseDate=?, rating=?
-      WHERE id=?
-    `,
-      )
-      .run(
+    const result = await pool.query(
+      `UPDATE movies SET
+        title=$1,
+        year=$2,
+        posterImageUrl=$3,
+        bannerImageUrl=$4,
+        overview=$5,
+        trailerUrl=$6,
+        director=$7,
+        writer=$8,
+        runTime=$9,
+        releaseDate=$10,
+        rating=$11
+      WHERE id=$12
+      RETURNING *`,
+      [
         title,
         year,
         posterImageUrl,
@@ -331,43 +242,46 @@ app.put("/movies/:id", authenticateAdmin, (req, res) => {
         director,
         writer,
         runTime,
-        displayDate,
+        formattedDate,
         rating,
         req.params.id,
-      );
+      ],
+    );
 
-    if (result.changes === 0)
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: "Movie not found" });
+    }
 
-    res.json({
-      id: req.params.id,
-      ...req.body,
-      releaseDate: displayDate,
-      message: "Successfully Edited Movie",
-    });
-  } catch (err) {
-    console.log(err.message);
-    res
-      .status(500)
-      .json({ message: "Something wnet wrong! Check console for details" });
-  }
-});
-
-// Delete a movie
-app.delete("/movies/:id", authenticateAdmin, (req, res) => {
-  try {
-    const result = db
-      .prepare("DELETE FROM movies WHERE id = ?")
-      .run(req.params.id);
-
-    if (result.changes === 0)
-      return res.status(404).json({ message: "Movie not found" });
-
-    res.json({ message: "Movie deleted" });
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// TODO: Repeat same async/await CRUD pattern for comics, characters, tv_shows, videos
-// Also add endpoints to link characters to movies/comics
+// DELETE MOVIE
+app.delete("/movies/:id", authenticateAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "DELETE FROM movies WHERE id = $1 RETURNING *",
+      [req.params.id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    res.json({ message: "Movie deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE ALL MOVIES
+app.delete("/movies/all", authenticateAdmin, async (req, res) => {
+  try {
+    await pool.query("DELETE FROM movies");
+    res.json({ message: "All movies deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
