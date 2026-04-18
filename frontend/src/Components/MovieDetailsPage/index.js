@@ -5,6 +5,18 @@ import Trailer from "../Trailer";
 import Footer from "../Footer";
 import "./index.css";
 
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
+
 class MovieDetailsPage extends Component {
   state = { movieDetails: {}, isLoading: false };
 
@@ -103,7 +115,7 @@ class MovieDetailsPage extends Component {
               </div>
               <div className="cast-card">
                 <p className="cast-heading">Release Date</p>
-                <p className="cast-para">{releaseDate}</p>
+                <p className="cast-para">{formatDate(releaseDate)}</p>
               </div>
             </div>
           </div>
