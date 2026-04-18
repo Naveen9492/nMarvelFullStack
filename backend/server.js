@@ -205,7 +205,7 @@ app.put("/movies/:id", authenticateAdmin, async (req, res) => {
     } = req.body;
 
     // ✅ FIXED: no ISO conversion, keep simple format
-    const formattedDate = releasedate || null;
+    const formattedDate = releasedate;
 
     const result = await pool.query(
       `UPDATE movies SET
