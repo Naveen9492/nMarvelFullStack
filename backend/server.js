@@ -46,8 +46,8 @@ const initializeDBAndServer = async () => {
     `);
 
     console.log("Database connected & tables ready");
-    const PORT = process.env.PORT || 5000;
 
+    const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`Server Running on port ${PORT}`);
     });
@@ -137,7 +137,7 @@ app.get("/movies/:id", async (req, res) => {
   }
 });
 
-// ADD MOVIE
+// ===================== ADD MOVIE =====================
 app.post("/movies", authenticateAdmin, async (req, res) => {
   try {
     const {
@@ -156,13 +156,8 @@ app.post("/movies", authenticateAdmin, async (req, res) => {
 
     const id = uuidv4();
 
-    const formattedDate = releaseDate
-      ? new Date(releasedate).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        })
-      : null;
+    // ✅ FIXED: no formatting, store as YYYY-MM-DD directly
+    const formattedDate = releasedate || null;
 
     const result = await pool.query(
       `INSERT INTO movies 
@@ -192,11 +187,9 @@ app.post("/movies", authenticateAdmin, async (req, res) => {
   }
 });
 
-// UPDATE MOVIE
+// ===================== UPDATE MOVIE =====================
 app.put("/movies/:id", authenticateAdmin, async (req, res) => {
   try {
-    const body = req.body;
-
     const {
       title,
       year,
@@ -209,11 +202,10 @@ app.put("/movies/:id", authenticateAdmin, async (req, res) => {
       runtime,
       releasedate,
       rating,
-    } = body;
+    } = req.body;
 
-    const formattedDate = releasedate
-      ? new Date(releasedate).toISOString().split("T")[0]
-      : null;
+    // ✅ FIXED: no ISO conversion, keep simple format
+    const formattedDate = releasedate || null;
 
     const result = await pool.query(
       `UPDATE movies SET
@@ -256,7 +248,7 @@ app.put("/movies/:id", authenticateAdmin, async (req, res) => {
   }
 });
 
-// DELETE MOVIE
+// ===================== DELETE MOVIE =====================
 app.delete("/movies/:id", authenticateAdmin, async (req, res) => {
   try {
     const result = await pool.query(
@@ -274,7 +266,7 @@ app.delete("/movies/:id", authenticateAdmin, async (req, res) => {
   }
 });
 
-// DELETE ALL MOVIES
+// ===================== DELETE ALL =====================
 app.delete("/movies/all", authenticateAdmin, async (req, res) => {
   try {
     await pool.query("DELETE FROM movies");
