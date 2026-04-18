@@ -36,7 +36,7 @@ class MoviesPage extends Component {
         trailerUrl: eachMovie.trailerurl,
         director: eachMovie.director,
         writer: eachMovie.writer,
-        runtime: eachMovie.runtime,
+        runTime: eachMovie.runtime,
         releaseDate: eachMovie.releasedate,
         rating: eachMovie.rating,
       }));

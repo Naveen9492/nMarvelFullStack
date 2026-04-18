@@ -18,28 +18,28 @@ class Admin extends Component {
     addMovieFields: {
       title: "",
       year: "",
-      posterImageUrl: "",
-      bannerImageUrl: "",
+      posterimageurl: "",
+      bannerimageurl: "",
       overview: "",
-      trailerUrl: "",
+      trailerurl: "",
       director: "",
       writer: "",
-      runTime: "",
-      releaseDate: "",
+      runtime: "",
+      releasedate: "",
       rating: "",
     },
     editMovieId: "",
     editMovieFields: {
       title: "",
       year: "",
-      posterImageUrl: "",
-      bannerImageUrl: "",
+      posterimageurl: "",
+      bannerimageurl: "",
       overview: "",
-      trailerUrl: "",
+      trailerurl: "",
       director: "",
       writer: "",
-      runTime: "",
-      releaseDate: "",
+      runtime: "",
+      releasedate: "",
       rating: "",
     },
   };
@@ -118,7 +118,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       addMovieFields: {
         ...prevState.addMovieFields,
-        posterImageUrl: event.target.value,
+        posterimageurl: event.target.value,
       },
     }));
   };
@@ -127,7 +127,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       addMovieFields: {
         ...prevState.addMovieFields,
-        bannerImageUrl: event.target.value,
+        bannerimageurl: event.target.value,
       },
     }));
   };
@@ -145,7 +145,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       addMovieFields: {
         ...prevState.addMovieFields,
-        trailerUrl: event.target.value,
+        trailerurl: event.target.value,
       },
     }));
   };
@@ -173,7 +173,7 @@ class Admin extends Component {
       this.setState((prevState) => ({
         addMovieFields: {
           ...prevState.addMovieFields,
-          runTime: parseInt(event.target.value),
+          runtime: parseInt(event.target.value),
         },
       }));
     }
@@ -182,7 +182,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       addMovieFields: {
         ...prevState.addMovieFields,
-        releaseDate: event.target.value,
+        releasedate: event.target.value,
       },
     }));
   };
@@ -220,7 +220,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       editMovieFields: {
         ...prevState.editMovieFields,
-        posterImageUrl: event.target.value,
+        posterimageurl: event.target.value,
       },
     }));
   };
@@ -229,7 +229,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       editMovieFields: {
         ...prevState.editMovieFields,
-        bannerImageUrl: event.target.value,
+        bannerimageurl: event.target.value,
       },
     }));
   };
@@ -247,7 +247,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       editMovieFields: {
         ...prevState.editMovieFields,
-        trailerUrl: event.target.value,
+        trailerurl: event.target.value,
       },
     }));
   };
@@ -275,7 +275,7 @@ class Admin extends Component {
       this.setState((prevState) => ({
         editMovieFields: {
           ...prevState.editMovieFields,
-          runTime: parseInt(event.target.value),
+          runtime: parseInt(event.target.value),
         },
       }));
     }
@@ -285,7 +285,7 @@ class Admin extends Component {
     this.setState((prevState) => ({
       editMovieFields: {
         ...prevState.editMovieFields,
-        releaseDate: event.target.value,
+        releasedate: event.target.value,
       },
     }));
   };
@@ -322,14 +322,14 @@ class Admin extends Component {
           addMovieFields: {
             title: "",
             year: "",
-            posterImageUrl: "",
-            bannerImageUrl: "",
+            posterimageurl: "",
+            bannerimageurl: "",
             overview: "",
-            trailerUrl: "",
+            trailerurl: "",
             director: "",
             writer: "",
-            runTime: "",
-            releaseDate: "",
+            runtime: "",
+            releasedate: "",
             rating: "",
           },
         });
@@ -365,14 +365,14 @@ class Admin extends Component {
           addMovieFields: {
             title: "",
             year: "",
-            posterImageUrl: "",
-            bannerImageUrl: "",
+            posterimageurl: "",
+            bannerimageurl: "",
             overview: "",
-            trailerUrl: "",
+            trailerurl: "",
             director: "",
             writer: "",
-            runTime: "",
-            releaseDate: "",
+            runtime: "",
+            releasedate: "",
             rating: "",
           },
         });
@@ -420,7 +420,7 @@ class Admin extends Component {
           type="text"
           id="poster-image"
           className="form-input-field"
-          value={addMovieFields.posterImageUrl}
+          value={addMovieFields.posterimageurl}
           onChange={this.onChangePosterInput}
         />
         <label className="form-label" htmlFor="banner-image">
@@ -430,7 +430,7 @@ class Admin extends Component {
           type="text"
           id="banner-image"
           className="form-input-field"
-          value={addMovieFields.bannerImageUrl}
+          value={addMovieFields.bannerimageurl}
           onChange={this.onChangeBannerInput}
         />
         <label className="form-label" htmlFor="overview">
@@ -450,7 +450,7 @@ class Admin extends Component {
           type="text"
           id="trailer"
           className="form-input-field"
-          value={addMovieFields.trailerUrl}
+          value={addMovieFields.trailerurl}
           onChange={this.onChangeTrailerInput}
         />
         <label className="form-label" htmlFor="director">
@@ -480,7 +480,7 @@ class Admin extends Component {
           type="number"
           id="runtime"
           className="form-input-field"
-          value={addMovieFields.runTime}
+          value={addMovieFields.runtime}
           onChange={this.onChangeRunTimeInput}
         />
         <label className="form-label" htmlFor="release-date">
@@ -490,7 +490,7 @@ class Admin extends Component {
           type="date"
           id="release-date"
           className="form-input-field"
-          value={addMovieFields.releaseDate}
+          value={addMovieFields.releasedate}
           onChange={this.onChangeReleaseDateInput}
         />
         <label className="form-label" htmlFor="rating">
@@ -572,7 +572,7 @@ class Admin extends Component {
           type="text"
           id="poster-image"
           className="form-input-field"
-          value={editMovieFields.posterImageUrl}
+          value={editMovieFields.posterimageurl}
           onChange={this.onChangeEditPosterInput}
         />
         <label className="form-label" htmlFor="banner-image">
@@ -582,7 +582,7 @@ class Admin extends Component {
           type="text"
           id="banner-image"
           className="form-input-field"
-          value={editMovieFields.bannerImageUrl}
+          value={editMovieFields.bannerimageurl}
           onChange={this.onChangeEditBannerInput}
         />
         <label className="form-label" htmlFor="overview">
@@ -602,7 +602,7 @@ class Admin extends Component {
           type="text"
           id="trailer"
           className="form-input-field"
-          value={editMovieFields.trailerUrl}
+          value={editMovieFields.trailerurl}
           onChange={this.onChangeEditTrailerInput}
         />
         <label className="form-label" htmlFor="director">
@@ -632,7 +632,7 @@ class Admin extends Component {
           type="number"
           id="runtime"
           className="form-input-field"
-          value={editMovieFields.runTime}
+          value={editMovieFields.runtime}
           onChange={this.onChangeEditRunTimeInput}
         />
         <label className="form-label" htmlFor="release-date">
@@ -642,7 +642,7 @@ class Admin extends Component {
           type="date"
           id="release-date"
           className="form-input-field"
-          value={formatDateForInput(editMovieFields.releaseDate)}
+          value={formatDateForInput(editMovieFields.releasedate)}
           onChange={this.onChangeEditReleaseDateInput}
         />
         <label className="form-label" htmlFor="rating">

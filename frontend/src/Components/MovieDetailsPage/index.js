@@ -26,20 +26,20 @@ class MovieDetailsPage extends Component {
       }
 
       const data = await response.json();
-      const formattedData = data.map((eachMovie) => ({
-        id: eachMovie.id,
-        title: eachMovie.title,
-        year: eachMovie.year,
-        posterImageUrl: eachMovie.posterimageurl,
-        bannerImageUrl: eachMovie.bannerimageurl,
-        overview: eachMovie.overview,
-        trailerUrl: eachMovie.trailerurl,
-        director: eachMovie.director,
-        writer: eachMovie.writer,
-        runtime: eachMovie.runtime,
-        releaseDate: eachMovie.releasedate,
-        rating: eachMovie.rating,
-      }));
+      const formattedData = {
+        id: data.id,
+        title: data.title,
+        year: data.year,
+        posterImageUrl: data.posterimageurl,
+        bannerImageUrl: data.bannerimageurl,
+        overview: data.overview,
+        trailerUrl: data.trailerurl,
+        director: data.director,
+        writer: data.writer,
+        runTime: data.runtime,
+        releaseDate: data.releasedate,
+        rating: data.rating,
+      };
 
       this.setState({
         movieDetails: formattedData,

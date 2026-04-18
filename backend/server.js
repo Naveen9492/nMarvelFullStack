@@ -143,21 +143,21 @@ app.post("/movies", authenticateAdmin, async (req, res) => {
     const {
       title,
       year,
-      posterImageUrl,
-      bannerImageUrl,
+      posterimageurl,
+      bannerimageurl,
       overview,
-      trailerUrl,
+      trailerurl,
       director,
       writer,
-      runTime,
-      releaseDate,
+      runtime,
+      releasedate,
       rating,
     } = req.body;
 
     const id = uuidv4();
 
     const formattedDate = releaseDate
-      ? new Date(releaseDate).toLocaleDateString("en-US", {
+      ? new Date(releasedate).toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
           year: "numeric",
@@ -173,13 +173,13 @@ app.post("/movies", authenticateAdmin, async (req, res) => {
         id,
         title,
         year,
-        posterImageUrl,
-        bannerImageUrl,
+        posterimageurl,
+        bannerimageurl,
         overview,
-        trailerUrl,
+        trailerurl,
         director,
         writer,
-        runTime,
+        runtime,
         formattedDate,
         rating,
       ],
@@ -195,26 +195,24 @@ app.post("/movies", authenticateAdmin, async (req, res) => {
 // UPDATE MOVIE
 app.put("/movies/:id", authenticateAdmin, async (req, res) => {
   try {
+    const body = req.body;
+
     const {
       title,
       year,
-      posterImageUrl,
-      bannerImageUrl,
+      posterimageurl,
+      bannerimageurl,
       overview,
-      trailerUrl,
+      trailerurl,
       director,
       writer,
-      runTime,
-      releaseDate,
+      runtime,
+      releasedate,
       rating,
-    } = req.body;
+    } = body;
 
-    const formattedDate = releaseDate
-      ? new Date(releaseDate).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        })
+    const formattedDate = releasedate
+      ? new Date(releasedate).toISOString().split("T")[0]
       : null;
 
     const result = await pool.query(
@@ -235,13 +233,13 @@ app.put("/movies/:id", authenticateAdmin, async (req, res) => {
       [
         title,
         year,
-        posterImageUrl,
-        bannerImageUrl,
+        posterimageurl,
+        bannerimageurl,
         overview,
-        trailerUrl,
+        trailerurl,
         director,
         writer,
-        runTime,
+        runtime,
         formattedDate,
         rating,
         req.params.id,
