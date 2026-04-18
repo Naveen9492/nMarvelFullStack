@@ -180,10 +180,13 @@ app.post("/movies", authenticateAdmin, async (req, res) => {
       ],
     );
 
-    res.status(201).json(result.rows[0]);
+    return res.status(201).json({
+      message: "Successfully added a movie",
+      movie: result.rows[0],
+    });
   } catch (err) {
     console.log(err.message);
-    res.status(500).json({ error: "Failed to add movie" });
+    return res.status(500).json({ error: "Failed to add movie" });
   }
 });
 
@@ -242,9 +245,12 @@ app.put("/movies/:id", authenticateAdmin, async (req, res) => {
       return res.status(404).json({ message: "Movie not found" });
     }
 
-    res.json(result.rows[0]);
+    return res.json({
+      message: "Movie details updated",
+      movie: result.rows[0],
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
