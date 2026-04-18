@@ -26,9 +26,23 @@ class MovieDetailsPage extends Component {
       }
 
       const data = await response.json();
+      const formattedData = data.map((eachMovie) => ({
+        id: eachMovie.id,
+        title: eachMovie.title,
+        year: eachMovie.year,
+        posterImageUrl: eachMovie.posterimageurl,
+        bannerImageUrl: eachMovie.bannerimageurl,
+        overview: eachMovie.overview,
+        trailerUrl: eachMovie.trailerurl,
+        director: eachMovie.director,
+        writer: eachMovie.writer,
+        runtime: eachMovie.runtime,
+        releaseDate: eachMovie.releasedate,
+        rating: eachMovie.rating,
+      }));
 
       this.setState({
-        movieDetails: data,
+        movieDetails: formattedData,
         isLoading: false,
       });
     } catch (error) {
