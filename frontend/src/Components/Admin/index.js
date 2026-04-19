@@ -42,6 +42,7 @@ class Admin extends Component {
       releasedate: "",
       rating: "",
     },
+    deleteMovieId: "",
   };
 
   getMovieList = async () => {
@@ -60,6 +61,7 @@ class Admin extends Component {
         moviesList: data,
         editMovieFields: data[0],
         editMovieId: data[0].id,
+        deleteMovieId: data[0].id,
       });
     } catch (error) {
       console.error("Error:", error);
@@ -72,14 +74,15 @@ class Admin extends Component {
   };
 
   onAddMovieTab = () => {
-    this.setState({ activeTab: updateConstants.addMovie });
+    this.setState({ activeTab: updateConstants.addMovie, formMessage: "" });
   };
 
   onDeleteMovieTab = () => {
-    this.setState({ activeTab: updateConstants.deleteMovie });
+    this.setState({ activeTab: updateConstants.deleteMovie, formMessage: "" });
+    this.getMovieList();
   };
   onEditMovieTab = () => {
-    this.setState({ activeTab: updateConstants.editMovie });
+    this.setState({ activeTab: updateConstants.editMovie, formMessage: "" });
     this.getMovieList();
   };
 
@@ -91,6 +94,16 @@ class Admin extends Component {
     this.setState({
       editMovieFields: movie,
       editMovieId: movie.id,
+    });
+  };
+
+  onChangeMovieToDelete = (event) => {
+    const { moviesList } = this.state;
+    const movie = moviesList.find((eachMovie) =>
+      eachMovie.id.includes(event.target.value),
+    );
+    this.setState({
+      deleteMovieId: movie.id,
     });
   };
 
@@ -384,6 +397,34 @@ class Admin extends Component {
     }
   };
 
+  onDeleteMovieForm = async (event) => {
+    event.preventDefault();
+    const { deleteMovieId } = this.state;
+    const jwtToken = Cookie.get("adminToken");
+    const deleteMovieURL = `https://nmarvelfullstack.onrender.com/movies/${deleteMovieId}`;
+    const options = {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+        "Content-Type": "application/json",
+      },
+    };
+    try {
+      const response = await fetch(deleteMovieURL, options);
+      const data = await response.json();
+
+      if (response.ok) {
+        this.setState({
+          formMessage: data.message,
+        });
+      } else {
+        this.setState({ formMessage: data.message });
+      }
+    } catch (error) {
+      this.setState({ errorMsg: "Something went wrong. Please try again." });
+    }
+  };
+
   renderAddMovieForm = () => {
     const { addMovieFields, formMessage } = this.state;
 
@@ -663,6 +704,37 @@ class Admin extends Component {
     );
   };
 
+  renderDeleteMovieForm = () => {
+    const { moviesList, formMessage, deleteMovieId } = this.state;
+
+    return (
+      <form
+        className="add-movie-form-container"
+        onSubmit={this.onDeleteMovieForm}
+      >
+        <label className="form-label" htmlFor="movie-id">
+          Select Movie
+        </label>
+        <select
+          value={deleteMovieId}
+          id="movie-id"
+          className="form-input-field"
+          onChange={this.onChangeMovieToDelete}
+        >
+          {moviesList.map((eachMovie) => (
+            <option key={eachMovie.id} value={eachMovie.id}>
+              {eachMovie.title}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="submit-button">
+          Delete
+        </button>
+        {formMessage !== "" && <p className="form-message">{formMessage}</p>}
+      </form>
+    );
+  };
+
   renderFinalView = () => {
     const { activeTab } = this.state;
 
@@ -671,6 +743,8 @@ class Admin extends Component {
         return this.renderAddMovieForm();
       case updateConstants.editMovie:
         return this.renderEditMovieForm();
+      case updateConstants.deleteMovie:
+        return this.renderDeleteMovieForm();
       default:
         return null;
     }
